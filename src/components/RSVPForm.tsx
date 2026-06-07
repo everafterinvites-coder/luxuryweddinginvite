@@ -74,15 +74,15 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
 
   return (
     <section id="rsvp-section" className="bg-[#FAF6EE] py-16 px-6 sm:px-8 border-b border-[#F3EBDD]/70 relative overflow-hidden">
-      {/* Decorative backdrop flowers */}
-      <div className="absolute right-[-15%] top-[-10%] w-96 h-96 rounded-full bg-[#FAF6EE] blur-3xl pointer-events-none border border-[#F3EBDD]" />
-      <div className="absolute left-[-15%] bottom-[-10%] w-96 h-96 rounded-full bg-[#EBF0EA]/60 blur-3xl pointer-events-none" />
+      {/* Decorative backdrop flowers (switched to low impact, safe golden & sage glow) */}
+      <div className="absolute right-[-15%] top-[-10%] w-96 h-96 rounded-full bg-[#C5A059]/5 blur-3xl pointer-events-none" />
+      <div className="absolute left-[-15%] bottom-[-10%] w-96 h-96 rounded-full bg-[#5F6F5E]/5 blur-3xl pointer-events-none" />
 
       <div className="max-w-2xl mx-auto text-center mb-10 relative z-10">
-        <span className="font-script text-4xl sm:text-5xl text-[#C5A059] block mb-1">Be Our Guest</span>
+        <span className="font-script text-4xl sm:text-5xl text-[#AF853E] block mb-1">Be Our Guest</span>
         <h2 className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide mb-3">Kindly Reply</h2>
         <div className="w-12 h-[1px] bg-[#C5A059] mx-auto mb-4" />
-        <p className="text-xs text-[#2C261F]/60 max-w-xs mx-auto font-light leading-relaxed">
+        <p className="text-xs text-[#2C261F] max-w-xs mx-auto font-medium leading-relaxed">
           Please respond by September 15, 2026. We are excited to raise a champagne toast with you!
         </p>
       </div>
