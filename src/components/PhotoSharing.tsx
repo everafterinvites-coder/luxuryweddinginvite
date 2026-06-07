@@ -220,7 +220,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#C5A059]/25 text-[#C5A059] text-[10px] font-bold tracking-widest uppercase mb-1"
         >
           <Camera className="w-3.5 h-3.5" />
-          <span>Shared Guest Album</span>
+          <span>Upload Your Photos</span>
         </motion.div>
 
         <motion.h2
@@ -230,7 +230,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide"
         >
-          Candid Guest Album
+          Upload Your Photos
         </motion.h2>
 
         <motion.p
