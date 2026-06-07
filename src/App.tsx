@@ -28,6 +28,7 @@ import OurStory from "./components/OurStory";
 import Itinerary from "./components/Itinerary";
 import EventDetails from "./components/EventDetails";
 import PhotoGallery from "./components/PhotoGallery";
+import PhotoSharing from "./components/PhotoSharing";
 import RSVPForm from "./components/RSVPForm";
 import OrganizerDashboard from "./components/OrganizerDashboard";
 // Beautiful imagery and cinematic backdrop for the invitation
@@ -41,8 +42,17 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [customGuest, setCustomGuest] = useState<string | null>(null);
   
+  // Custom Photo sharing target link live synchronizer
+  const [photoUploadUrl, setPhotoUploadUrl] = useState(() => {
+    return localStorage.getItem("wedding_photo_upload_url") || "https://photos.app.goo.gl/AlexandraAndDylan2027";
+  });
+
+  const handleUpdateUploadUrl = (newUrl: string) => {
+    localStorage.setItem("wedding_photo_upload_url", newUrl);
+    setPhotoUploadUrl(newUrl);
+  };
+  
   // Immersive layout config
-  const [isFullscreenMode, setIsFullscreenMode] = useState(false); // Toggle mobile simulation vs fullscreen
   const [hasEntered, setHasEntered] = useState(true); // Default to true to remove the envelope/splash at the start
   const [isMuted, setIsMuted] = useState(true);
   const [rsvpTick, setRsvpTick] = useState(0); // Trigger reload of stats on dashboard
@@ -106,7 +116,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF6EE] text-[#2C261F] flex items-center justify-center relative overflow-hidden select-none">
+    <div className="min-h-screen w-full bg-[#FAF6EE] text-[#2C261F] relative select-none">
       
       {/* EXQUISITE BLURRED DECORATIVE DESKTOP CANVAS BACKGROUND */}
       <div 
@@ -116,7 +126,7 @@ export default function App() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#FAF6EE]/90 via-[#FAF6EE]/50 to-[#F3EBDD]/90 pointer-events-none hidden lg:block" />
 
       {/* FLOATING TOP BRAND HEADER (Desktop view only) */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/70 backdrop-blur-md border-b border-[#F3EBDD]/80 items-center justify-between px-8 z-30 hidden lg:flex">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-[#F3EBDD]/50 items-center justify-between px-8 z-30 hidden lg:flex">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full border border-[#C5A059] flex items-center justify-center font-serif-luxury text-xs text-[#C5A059]">
             {COUPLE_INFO.initials}
@@ -126,26 +136,44 @@ export default function App() {
           </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Layout mode switcher */}
+        <nav className="flex items-center gap-6 text-[10px] sm:text-xs uppercase tracking-widest font-semibold text-[#2C261F]/75">
           <button
-            onClick={() => setIsFullscreenMode(!isFullscreenMode)}
-            id="toggle-fullscreen-mode"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#F3EBDD] bg-[#FAF6EE] text-xs hover:bg-[#F3EBDD] transition-colors font-medium cursor-pointer"
+            onClick={() => handleScrollTo("home", "home")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "home" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
           >
-            {isFullscreenMode ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5 text-[#C5A059]" />
-                <span>Simulate mobile invite frame</span>
-              </>
-            ) : (
-              <>
-                <Maximize2 className="w-3.5 h-3.5 text-[#C5A059]" />
-                <span>Expand to full screen desktop</span>
-              </>
-            )}
+            Invite
           </button>
-        </div>
+          <button
+            onClick={() => handleScrollTo("our-story-section", "journey")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "journey" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
+          >
+            Story
+          </button>
+          <button
+            onClick={() => handleScrollTo("event-details-section", "details")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "details" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
+          >
+            Venue
+          </button>
+          <button
+            onClick={() => handleScrollTo("photo-gallery-section", "gallery")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "gallery" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
+          >
+            Gallery
+          </button>
+          <button
+            onClick={() => handleScrollTo("photo-sharing-section", "photos")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "photos" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
+          >
+            Guest Photos
+          </button>
+          <button
+            onClick={() => handleScrollTo("rsvp-section-form", "rsvp")}
+            className={`transition-colors cursor-pointer hover:text-[#C5A059] py-2 ${activeTab === "rsvp" ? "text-[#C5A059] border-b border-[#C5A059]" : ""}`}
+          >
+            RSVP
+          </button>
+        </nav>
       </header>
 
       {/* FLOATING MUSIC INDICATOR TOOL */}
@@ -228,15 +256,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* CORE PORTAL SCROLLER CANVAS (Optimized to simulate mobile or full-size based on preference) */}
+      {/* CORE PORTAL SCROLLER CANVAS (Optimized as premium responsive layout native to desktop and mobile) */}
       <main 
         id="invite-scroller-frame"
-        className={`w-full min-h-screen bg-white transition-all duration-500 overflow-y-auto relative outline-none flex flex-col ${
+        className={`w-full min-h-screen bg-[#FAF6EE] transition-all duration-500 relative outline-none flex flex-col ${
           hasEntered ? "animate-soft-blur" : ""
-        } ${
-          isFullscreenMode
-            ? "max-w-full"
-            : "max-w-md lg:max-w-lg lg:min-h-[82vh] lg:h-[82vh] lg:rounded-3xl lg:border-8 lg:border-[#2C261F] lg:shadow-2xl lg:my-14"
         }`}
       >
         <div className="flex-1 pb-32">
@@ -353,6 +377,9 @@ export default function App() {
             weddingDetail={weddingDetailImg} 
           />
 
+          {/* SECTION 5.5: PHOTO SHARING GUEST QR CODE */}
+          <PhotoSharing uploadUrl={photoUploadUrl} />
+
           {/* SECTION 6: THE GIFT REGISTRY PREVIEW & FAQS */}
           <section id="registry-section" className="bg-[#FAF6EE] py-14 px-6 border-b border-[#F3EBDD]/70 space-y-10 text-center">
             
@@ -424,63 +451,72 @@ export default function App() {
           </div>
 
           {/* SECTION 8: ORGANIZER PORTAL */}
-          <OrganizerDashboard tick={rsvpTick} onReset={() => setRsvpTick((t) => t + 1)} />
+          <OrganizerDashboard 
+            tick={rsvpTick} 
+            onReset={() => setRsvpTick((t) => t + 1)} 
+            uploadUrl={photoUploadUrl}
+            onUpdateUploadUrl={handleUpdateUploadUrl}
+          />
 
         </div>
 
-        {/* BRASS ACCENT FLOATING CORE MENU (Locked at viewport bottom inside simulated frame or general view) */}
+        {/* BRASS ACCENT FLOATING CORE MENU (Fixed to screen bottom on mobile only, hidden on desktop) */}
         <nav 
           id="brass-menu-navigation"
-          className="absolute bottom-0 left-0 right-0 h-18 bg-white/95 backdrop-blur-md border-t border-[#F3EBDD] grid grid-cols-5 py-2.5 z-40 select-none pb-4"
+          className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-[#F3EBDD]/60 grid grid-cols-5 py-2 z-40 select-none shadow-[0_-4px_12px_rgba(0,0,0,0.05)] lg:hidden"
         >
           <button
             onClick={() => handleScrollTo("home", "home")}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === "home" ? "text-[#C5A059]" : "text-[#2C261F]/50"
             }`}
           >
-            <Home className="w-4.5 h-4.5" />
-            <span className="text-[9px] font-medium tracking-wide">Invite</span>
+            <Home className="w-[18px] h-[18px]" />
+            <span className="text-[10px] font-semibold tracking-wide">Invite</span>
           </button>
 
           <button
             onClick={() => handleScrollTo("our-story-section", "journey")}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === "journey" ? "text-[#C5A059]" : "text-[#2C261F]/50"
             }`}
           >
-            <BookOpen className="w-4.5 h-4.5" />
-            <span className="text-[9px] font-medium tracking-wide">Story</span>
+            <BookOpen className="w-[18px] h-[18px]" />
+            <span className="text-[10px] font-semibold tracking-wide">Story</span>
           </button>
 
           <button
             onClick={() => handleScrollTo("event-details-section", "details")}
-            className={`flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer relative`}
+            className={`flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer relative ${
+              activeTab === "details" ? "text-[#C5A059]" : "text-[#2C261F]/50"
+            }`}
           >
-            <div className="absolute top-[-14px] w-9 h-9 rounded-full bg-[#C5A059] flex items-center justify-center text-white shadow-md hover:bg-[#AF853E] transition-colors border-2 border-white">
-              <Map className="w-4 h-4" />
+            <div className={`absolute top-[-10px] w-8 h-8 rounded-full flex items-center justify-center text-white shadow-md transition-colors border-2 border-white ${
+              activeTab === "details" ? "bg-[#C5A059]" : "bg-[#2C261F]/40"
+            }`}>
+              <Map className="w-3.5 h-3.5" />
             </div>
-            <span className="text-[9px] font-medium tracking-wide mt-3.5">Venue</span>
+            <span className="text-[10px] font-semibold tracking-wide mt-4.5">Venue</span>
           </button>
 
           <button
             onClick={() => handleScrollTo("photo-gallery-section", "gallery")}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === "gallery" ? "text-[#C5A059]" : "text-[#2C261F]/50"
             }`}
           >
-            <Image className="w-4.5 h-4.5" />
-            <span className="text-[9px] font-medium tracking-wide">Gallery</span>
+            <Image className="w-[18px] h-[18px]" />
+            <span className="text-[10px] font-semibold tracking-wide">Gallery</span>
           </button>
 
           <button
             onClick={() => handleScrollTo("rsvp-section-form", "rsvp")}
-            className={`flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === "rsvp" ? "text-[#C5A059]" : "text-[#2C261F]/50"
             }`}
           >
-            <FileCheck className="w-4.5 h-4.5" />
-            <span className="text-[9px] font-medium tracking-wide">RSVP</span>
+            <FileCheck className="w-[18px] h-[18px]" />
+            <span className="text-[10px] font-semibold tracking-wide">RSVP</span>
           </button>
         </nav>
       </main>

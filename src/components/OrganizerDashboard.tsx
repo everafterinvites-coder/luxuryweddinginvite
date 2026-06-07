@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { QRCodeSVG } from "qrcode.react";
 import { RSVPResponse } from "../types";
 import { 
   Users, 
@@ -8,20 +9,41 @@ import {
   ShieldCheck, 
   Trash2, 
   Smile, 
-  UtensilsCrossed 
+  UtensilsCrossed,
+  Camera,
+  QrCode,
+  Save,
+  Link2,
+  Download
 } from "lucide-react";
 
 interface OrganizerDashboardProps {
   tick: number; // Increment this to force status reload
   onReset: () => void;
+  uploadUrl: string;
+  onUpdateUploadUrl: (url: string) => void;
 }
 
-export default function OrganizerDashboard({ tick, onReset }: OrganizerDashboardProps) {
+export default function OrganizerDashboard({ 
+  tick, 
+  onReset, 
+  uploadUrl, 
+  onUpdateUploadUrl 
+}: OrganizerDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submss, setSubmss] = useState<RSVPResponse[]>([]);
   const [passcode, setPasscode] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [authError, setAuthError] = useState(false);
+  const [tempUrl, setTempUrl] = useState(uploadUrl);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
+    // Sync temp input when outer state updates
+  useEffect(() => {
+    setTempUrl(uploadUrl);
+  }, [uploadUrl]);
+
+  const [candids, setCandids] = useState<any[]>([]);
 
   useEffect(() => {
     try {
@@ -35,6 +57,57 @@ export default function OrganizerDashboard({ tick, onReset }: OrganizerDashboard
       setSubmss([]);
     }
   }, [tick, isOpen]);
+
+  // Read candids
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("wedding_guest_candids");
+      if (stored) {
+        setCandids(JSON.parse(stored));
+      } else {
+        setCandids([]);
+      }
+    } catch (e) {
+      setCandids([]);
+    }
+  }, [tick, isOpen]);
+
+  // Toggle visible moderation
+  const handleToggleApprove = (id: string) => {
+    const updated = candids.map(c => {
+      if (c.id === id) {
+        return { ...c, approved: c.approved === false ? true : false };
+      }
+      return c;
+    });
+    localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
+    setCandids(updated);
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  // Delete unwanted pics
+  const handleDeleteCandid = (id: string) => {
+    if (confirm("Delete this guest photo permanently? This action cannot be undone.")) {
+      const updated = candids.filter(c => c.id !== id);
+      localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
+      setCandids(updated);
+      window.dispatchEvent(new Event("storage"));
+    }
+  };
+
+  // Force file download to device
+  const handleDownloadCandid = (c: any) => {
+    try {
+      const link = document.createElement("a");
+      link.href = c.imgData;
+      link.download = `candid_by_${c.sender.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${c.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      alert("Error trying to download image file.");
+    }
+  };
 
   // Seed with standard mock initial guests if empty, to look incredible out of the box!
   const handleSeedMockReplies = () => {
@@ -196,6 +269,179 @@ export default function OrganizerDashboard({ tick, onReset }: OrganizerDashboard
                           DECLINES
                         </span>
                       </div>
+                    </div>
+
+                    {/* QR Code and Album Setup */}
+                    <div className="bg-[#FAF6EE] border border-[#C5A059]/20 rounded-xl p-3.5 space-y-3">
+                      <div className="flex items-center gap-1.5 text-[#C5A059]">
+                        <Camera className="w-4 h-4" />
+                        <h5 className="text-[11px] font-bold tracking-wider uppercase">
+                          QR Album Setup (Bride & Groom Only)
+                        </h5>
+                      </div>
+                      
+                      <p className="text-[10px] text-[#2C261F]/70 leading-relaxed font-light">
+                        Set the URL for your guest photo album (Google Photos, Joy, Wedbox, etc.). The QR code will update instantly!
+                      </p>
+
+                      <div className="space-y-2">
+                        <div className="flex gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="https://photos.app.goo.gl/..."
+                            value={tempUrl}
+                            onChange={(e) => setTempUrl(e.target.value)}
+                            className="flex-1 px-2.5 py-1.5 text-[11px] rounded-lg border border-[#F3EBDD] bg-white text-[#2C261F] outline-none focus:border-[#C5A059]"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (tempUrl.trim()) {
+                                onUpdateUploadUrl(tempUrl.trim());
+                                setShowSaveSuccess(true);
+                                setTimeout(() => setShowSaveSuccess(false), 4000);
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-[#C5A059] hover:bg-[#AF853E] text-white text-[11px] font-semibold rounded-lg flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+                          >
+                            <Save className="w-3.5 h-3.5" />
+                            <span>Save</span>
+                          </button>
+                        </div>
+
+                        {showSaveSuccess && (
+                          <p className="text-[9px] text-green-700 font-semibold">
+                            ✓ Album upload link updated successfully!
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-3 pt-1">
+                          <div className="w-12 h-12 bg-white border border-[#F3EBDD] rounded-lg p-1 flex items-center justify-center overflow-hidden shrink-0">
+                            <QRCodeSVG
+                              value={uploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027"}
+                              size={44}
+                              bgColor={"#ffffff"}
+                              fgColor={"#2C261F"}
+                              level={"M"}
+                              includeMargin={false}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <p className="text-[9px] text-gray-500 font-mono truncate" title={uploadUrl}>
+                              Target: {uploadUrl}
+                            </p>
+                            <div className="flex gap-3">
+                              <a
+                                href={uploadUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[9px] text-[#C5A059] hover:underline font-semibold"
+                              >
+                                <Link2 className="w-3 h-3" />
+                                <span>Test URL</span>
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(uploadUrl);
+                                  alert("Copied album link to clipboard!");
+                                }}
+                                className="inline-flex items-center gap-1 text-[9px] text-gray-500 hover:underline font-semibold cursor-pointer"
+                              >
+                                <QrCode className="w-3 h-3" />
+                                <span>Copy Link</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Guest Candid Captures Moderation Hub */}
+                    <div className="bg-[#FAF6EE] border border-[#5F6F5E]/20 rounded-xl p-3.5 space-y-3">
+                      <div className="flex items-center gap-1.5 text-[#5F6F5E]">
+                        <Camera className="w-4 h-4" />
+                        <h5 className="text-[11px] font-bold tracking-wider uppercase">
+                          Guest Candid Photos ({candids.length})
+                        </h5>
+                      </div>
+
+                      <p className="text-[10px] text-[#2C261F]/70 leading-relaxed font-light">
+                        Review, hide/show, or download candid pictures snapped by guests. Unapproved/hidden captures won't display to other visitors.
+                      </p>
+
+                      {candids.length === 0 ? (
+                        <p className="text-[10px] text-gray-450 italic font-light text-center py-2 bg-white rounded-lg border border-[#F3EBDD]">
+                          No photos uploaded yet. Snap some above!
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto pr-1">
+                          {candids.map((c) => (
+                            <div 
+                              key={c.id} 
+                              className="bg-white border border-[#F3EBDD] rounded-lg p-1.5 flex gap-2.5 items-center justify-between"
+                            >
+                              <div className="flex gap-2.5 items-center min-w-0">
+                                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-100 shrink-0">
+                                  <img 
+                                    src={c.imgData} 
+                                    alt="Candid" 
+                                    className="w-full h-full object-cover" 
+                                  />
+                                </div>
+                                <div className="space-y-0.5 min-w-0">
+                                  <p className="text-[10px] font-bold text-[#2C261F] truncate">
+                                    {c.sender}
+                                  </p>
+                                  {c.caption && (
+                                    <p className="text-[9px] text-[#2C261F]/65 truncate italic max-w-[120px]">
+                                      "{c.caption}"
+                                    </p>
+                                  )}
+                                  <span className="text-[8px] tracking-wide block font-semibold text-gray-500">
+                                    {c.approved !== false ? "🟢 Live on feed" : "🔴 Hidden"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleApprove(c.id)}
+                                  className={`px-1.5 py-1 text-[9px] font-semibold rounded cursor-pointer transition-colors ${
+                                    c.approved !== false
+                                      ? "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-100"
+                                      : "bg-green-50 text-green-700 hover:bg-green-100 border border-green-100"
+                                  }`}
+                                  title={c.approved !== false ? "Hide from guests" : "Approve/Show"}
+                                >
+                                  {c.approved !== false ? "Hide" : "Show"}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadCandid(c)}
+                                  className="p-1 text-[#C5A059] hover:bg-[#FAF6EE] rounded transition-colors cursor-pointer"
+                                  title="Download Original"
+                                >
+                                  <Download className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteCandid(c.id)}
+                                  className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                                  title="Delete Permanent"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Guest Table/List */}

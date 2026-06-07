@@ -87,7 +87,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
         </p>
       </div>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-2xl mx-auto">
         <AnimatePresence mode="wait">
           {status === "success" ? (
             <motion.div

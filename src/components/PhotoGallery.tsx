@@ -44,7 +44,7 @@ export default function PhotoGallery({ weddingHero, weddingCouple, weddingDetail
       </div>
 
       {/* Styled Grid */}
-      <div className="max-w-md mx-auto grid grid-cols-2 gap-3">
+      <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-4">
         {photos.map((photo, index) => {
           // Adjust specific heights to make it look randomized and beautiful
           const isWide = photo.aspectRatio === "16:9";

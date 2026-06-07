@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/luxuryweddinginvite/', // Updated base path for GitHub Pages
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

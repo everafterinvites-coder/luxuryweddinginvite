@@ -30,7 +30,7 @@ export default function EventDetails({ detailPhotoUrl }: EventDetailsProps) {
         </motion.div>
       </div>
 
-      <div className="max-w-md mx-auto grid grid-cols-1 gap-8 relative z-10">
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
         {/* Core details Card */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

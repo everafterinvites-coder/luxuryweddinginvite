@@ -42,7 +42,7 @@ export default function Itinerary() {
         </motion.div>
       </div>
 
-      <div className="max-w-md mx-auto space-y-8 relative">
+      <div className="max-w-2xl mx-auto space-y-8 relative">
         {/* Fine background vertical connection line path */}
         <div className="absolute left-[20px] top-4 bottom-4 w-[1px] bg-[#C5A059]/25" />
 
