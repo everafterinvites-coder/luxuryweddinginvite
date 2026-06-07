@@ -78,7 +78,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
       <div className="absolute right-[-15%] top-[-10%] w-96 h-96 rounded-full bg-[#FAF6EE] blur-3xl pointer-events-none border border-[#F3EBDD]" />
       <div className="absolute left-[-15%] bottom-[-10%] w-96 h-96 rounded-full bg-[#EBF0EA]/60 blur-3xl pointer-events-none" />
 
-      <div className="max-w-2xl mx-auto text-center mb-10">
+      <div className="max-w-2xl mx-auto text-center mb-10 relative z-10">
         <span className="font-script text-4xl sm:text-5xl text-[#C5A059] block mb-1">Be Our Guest</span>
         <h2 className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide mb-3">Kindly Reply</h2>
         <div className="w-12 h-[1px] bg-[#C5A059] mx-auto mb-4" />
@@ -87,7 +87,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto relative z-10">
         <AnimatePresence mode="wait">
           {status === "success" ? (
             <motion.div

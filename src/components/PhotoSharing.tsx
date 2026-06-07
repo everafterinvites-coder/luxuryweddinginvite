@@ -6,16 +6,19 @@ import {
   Heart, 
   Sparkles, 
   Check, 
-  Image as ImageIcon 
+  Image as ImageIcon,
+  MessageSquareHeart,
+  CalendarCheck
 } from "lucide-react";
 
 interface GuestCandid {
   id: string;
   sender: string;
   caption?: string;
-  imgData: string; // Resized lightweight base64 URL or standard URL
+  imgData: string; // Resized lightweight base64 URL
   timestamp: string;
   approved: boolean;
+  likes?: number;
 }
 
 interface PhotoSharingProps {
@@ -29,41 +32,28 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
   const [captionText, setCaptionText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [likedIds, setLikedIds] = useState<string[]>([]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch guest candid captures from localStorage on load
+  // Fetch guest captures from localStorage on load
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("wedding_guest_candids");
-      if (stored) {
-        setCandids(JSON.parse(stored));
-      } else {
-        // Initial beautifully styled demo placeholder images
-        const initialCandids: GuestCandid[] = [
-          {
-            id: "initial-1",
-            sender: "Julian Thorne",
-            caption: "Breathtaking views of the lake!",
-            imgData: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80",
-            timestamp: "A few hours ago",
-            approved: true
-          },
-          {
-            id: "initial-2",
-            sender: "Lady Eleanor",
-            caption: "Getting ready for forever, absolute royalty.",
-            imgData: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=400&q=80",
-            timestamp: "Just now",
-            approved: true
-          }
-        ];
-        localStorage.setItem("wedding_guest_candids", JSON.stringify(initialCandids));
-        setCandids(initialCandids);
+    const loadCandids = () => {
+      try {
+        const stored = localStorage.getItem("wedding_guest_candids");
+        if (stored) {
+          setCandids(JSON.parse(stored));
+        } else {
+          // Start empty for genuine user-generated memories
+          localStorage.setItem("wedding_guest_candids", JSON.stringify([]));
+          setCandids([]);
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
-    }
+    };
+
+    loadCandids();
 
     const handleStorageChange = () => {
       try {
@@ -73,7 +63,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
     };
 
     window.addEventListener("storage", handleStorageChange);
-    const timer = setInterval(handleStorageChange, 3500);
+    const timer = setInterval(handleStorageChange, 3000);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -81,7 +71,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
     };
   }, []);
 
-  // Compression helper to keep premium captures swift and lightweight inside storage
+  // Compression helper to keep captures swift and lightweight
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -91,8 +81,8 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 640;
-        const MAX_HEIGHT = 640;
+        const MAX_WIDTH = 720;
+        const MAX_HEIGHT = 720;
         let width = img.width;
         let height = img.height;
 
@@ -114,7 +104,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.72);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
           setSelectedFile(dataUrl);
         }
       };
@@ -135,7 +125,8 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
         caption: captionText.trim() || undefined,
         imgData: selectedFile,
         timestamp: "Just now",
-        approved: true
+        approved: true, // Auto-approved on upload; can be moderated from Organizer Dashboard
+        likes: 0
       };
 
       try {
@@ -148,7 +139,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
         
         window.dispatchEvent(new Event("storage"));
       } catch (err) {
-        alert("Our shared album is currently full! Please inform the happy couple to manage and delete older test pictures via the Organizer Dashboard.");
+        alert("The shared album is full! Please manage and delete older images via the Organizer Dashboard.");
       }
 
       setSelectedFile(null);
@@ -157,10 +148,30 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
       setIsUploading(false);
       setShowConfirmation(true);
       setTimeout(() => setShowConfirmation(false), 5000);
-    }, 1100);
+    }, 900);
   };
 
-  // Action to launch camera smoothly
+  // Handle heart like action on pictures
+  const handleLikePhoto = (id: string) => {
+    if (likedIds.includes(id)) return; // Only allow one like per session
+    
+    try {
+      const stored = localStorage.getItem("wedding_guest_candids");
+      const currentList: GuestCandid[] = stored ? JSON.parse(stored) : [];
+      const updated = currentList.map(c => {
+        if (c.id === id) {
+          return { ...c, likes: (c.likes || 0) + 1 };
+        }
+        return c;
+      });
+      localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
+      setCandids(updated);
+      setLikedIds(prev => [...prev, id]);
+      window.dispatchEvent(new Event("storage"));
+    } catch (err) {}
+  };
+
+  // Launch camera
   const triggerCamera = () => {
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute("capture", "environment");
@@ -168,7 +179,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
     }
   };
 
-  // Action to select pre-existing photo
+  // Upload file from device storage
   const triggerFolderFile = () => {
     if (fileInputRef.current) {
       fileInputRef.current.removeAttribute("capture");
@@ -187,7 +198,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
       const hrs = Math.floor(mins / 60);
       return `${hrs}h ago`;
     } catch (e) {
-      return "Candid";
+      return "Just now";
     }
   };
 
@@ -206,7 +217,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
         onChange={handleFileChange} 
       />
 
-      {/* Elegant atmospheric blurred background backdrops */}
+      {/* Atmospheric backgrounds */}
       <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-80 h-80 rounded-full bg-[#C5A059]/4 blur-3xl pointer-events-none" />
       <div className="absolute top-1/4 right-1/3 -translate-y-1/2 w-80 h-80 rounded-full bg-[#5F6F5E]/3 blur-3xl pointer-events-none" />
 
@@ -230,7 +241,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide"
         >
-          Upload Your Photos
+          Shared Wedding Album
         </motion.h2>
 
         <motion.p
@@ -240,11 +251,11 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-xs sm:text-sm text-[#2C261F]/70 font-light max-w-lg mx-auto leading-relaxed"
         >
-          Help us save every beautiful, joyous, and spontaneous moment of our wedding! Launch your camera to snap a live candid photo, or select a picture from your device to save immediately into our shared album.
+          Help us document our special day! Capture your favorite moments, laughs, and angles using your phone's camera, or upload existing pictures to our live digital album.
         </motion.p>
       </div>
 
-      {/* Premium Centered Upload Panel */}
+      {/* Centered Upload Panel */}
       <div className="max-w-md mx-auto relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 25 }}
@@ -267,11 +278,11 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                   <h4 className="font-serif-luxury text-base text-[#2C261F] tracking-wide">
                     Verify Your Upload
                   </h4>
-                  <p className="text-[10px] text-[#2C261F]/50">Your photo will be securely shared with the couple</p>
+                  <p className="text-[10px] text-[#2C261F]/50">Your photo will be shared in our guest memories album</p>
                 </div>
 
                 <div className="w-full h-48 bg-[#FAF6EE] rounded-xl overflow-hidden border border-[#F3EBDD] relative shadow-4xs flex items-center justify-center">
-                  <img src={selectedFile} alt="Candid Capture Review" className="h-full w-full object-cover" />
+                  <img src={selectedFile} alt="Capture Review" className="h-full w-full object-cover" />
                   <button 
                     onClick={() => setSelectedFile(null)}
                     type="button"
@@ -288,7 +299,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                     </label>
                     <input 
                       type="text" 
-                      placeholder="e.g. Grandma Rose"
+                      placeholder="e.g. Cousin Sarah"
                       value={guestName}
                       onChange={(e) => setGuestName(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-[#F3EBDD] bg-[#FAF6EE] focus:border-[#C5A059] focus:bg-white outline-none text-[#2C261F] transition-all"
@@ -297,11 +308,11 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
 
                   <div>
                     <label className="block text-[10px] uppercase font-bold text-[#2C261F]/60 tracking-wider mb-1">
-                      Add a Cute Note (Optional)
+                      Add a Caption (Optional)
                     </label>
                     <input 
                       type="text" 
-                      placeholder="e.g. Best wedding ceremony ever! 💍"
+                      placeholder="e.g. Stunning ceremony! 💖"
                       value={captionText}
                       onChange={(e) => setCaptionText(e.target.value)}
                       className="w-full px-3 py-2 text-xs rounded-lg border border-[#F3EBDD] bg-[#FAF6EE] focus:border-[#C5A059] focus:bg-white outline-none text-[#2C261F] transition-all"
@@ -314,14 +325,14 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                     onClick={() => setSelectedFile(null)}
                     className="flex-1 py-2.5 rounded-xl border border-[#F3EBDD] hover:bg-[#FAF6EE] text-[#2C261F]/70 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
                   >
-                    Retake
+                    Cancel
                   </button>
                   <button
                     onClick={handleCandidUpload}
                     disabled={isUploading}
                     className="flex-1 py-2.5 rounded-xl bg-[#C5A059] hover:bg-[#AF853E] text-white text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-3xs cursor-pointer disabled:opacity-50"
                   >
-                    {isUploading ? "Sharing..." : "Post Candid"}
+                    {isUploading ? "Uploading..." : "Upload Photo"}
                   </button>
                 </div>
               </motion.div>
@@ -339,9 +350,9 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="font-serif-luxury text-lg text-[#2C261F]">Post Your Photos</h3>
+                  <h3 className="font-serif-luxury text-lg text-[#2C261F]">Share Memories</h3>
                   <p className="text-xs text-[#2C261F]/60 font-light max-w-xs mx-auto">
-                    Capture and snap the lovely celebrations directly using your smartphone camera or library.
+                    Take a live photo at the wedding reception or choose high-quality snaps from your photo library.
                   </p>
                 </div>
 
@@ -351,7 +362,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                     className="w-full py-3 px-4 rounded-xl bg-[#C5A059] hover:bg-[#AF853E] text-white text-xs font-semibold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 shadow-2xs cursor-pointer group"
                   >
                     <Camera className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                    <span>Launch Real Camera</span>
+                    <span>Take Live Picture</span>
                   </button>
 
                   <button
@@ -359,7 +370,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                     className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#C5A059]/30 hover:bg-[#FAF6EE] text-[#C5A059] text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <ImageIcon className="w-4 h-4" />
-                    <span>Upload From Device</span>
+                    <span>Choose From Library</span>
                   </button>
                 </div>
 
@@ -372,7 +383,7 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                       className="text-xs text-green-700 font-semibold flex items-center justify-center gap-1.5 mt-2"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Successfully added to the private wedding collection!</span>
+                      <span>Successfully added to the shared wedding album!</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -380,6 +391,88 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
             )}
           </AnimatePresence>
         </motion.div>
+      </div>
+
+      {/* Guest Upload Gallery Grid (Dynamic and loads real-time uploaded images) */}
+      <div className="max-w-4xl mx-auto space-y-6 pt-10 border-t border-[#F3EBDD]/60 relative z-10">
+        <div className="text-center space-y-1">
+          <h4 className="font-serif-luxury text-xl sm:text-2xl text-[#2C261F] tracking-wide">Guest Shared Album</h4>
+          <p className="text-[10px] text-[#C5A059] font-mono tracking-widest uppercase">Live Moments Captured By Loved Ones</p>
+        </div>
+
+        {visibleCandids.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12 px-6 bg-white border border-[#F3EBDD]/70 rounded-3xl max-w-md mx-auto space-y-3"
+          >
+            <div className="w-12 h-12 rounded-full bg-[#FAF6EE] border border-[#C5A059]/25 flex items-center justify-center mx-auto text-[#C5A059]/80">
+              <CalendarCheck className="w-5 h-5" />
+            </div>
+            <p className="text-xs text-[#2C261F]/60 font-light leading-relaxed max-w-xs mx-auto">
+              Our shared album is empty at the moment. High-quality snaps and lovely moments uploaded by you and other wedding guests will populate here instantly!
+            </p>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {visibleCandids.map((candid) => (
+                <motion.div
+                  key={candid.id}
+                  layoutId={`guest-photo-${candid.id}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                  className="bg-white border border-[#F3EBDD] rounded-2xl overflow-hidden p-2.5 shadow-4xs hover:shadow-3xs transition-shadow flex flex-col justify-between group"
+                >
+                  <div className="space-y-3">
+                    {/* Picture Display */}
+                    <div className="aspect-square w-full rounded-xl overflow-hidden bg-[#FAF6EE] relative border border-[#F3EBDD]/40">
+                      <img 
+                        src={candid.imgData} 
+                        alt={`Shared by ${candid.sender}`}
+                        className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500" 
+                      />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-white/80 backdrop-blur-xs text-[9px] font-mono font-medium text-[#2C261F]/70">
+                        {getDisplayTime(candid)}
+                      </div>
+                    </div>
+
+                    {/* Metadata & Message Info */}
+                    <div className="px-1.5 space-y-1.5">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[11px] font-bold text-[#2C261F] truncate" title={candid.sender}>
+                          By {candid.sender}
+                        </span>
+
+                        {/* Interactive Client-Side Hearts */}
+                        <button
+                          onClick={() => handleLikePhoto(candid.id)}
+                          disabled={likedIds.includes(candid.id)}
+                          className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full transition-colors cursor-pointer ${
+                            likedIds.includes(candid.id) 
+                              ? "bg-red-50 text-red-600 font-semibold" 
+                              : "bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500"
+                          }`}
+                        >
+                          <Heart className={`w-3 h-3 ${likedIds.includes(candid.id) ? "fill-red-600 scale-110" : ""} transition-transform`} />
+                          <span>{candid.likes || 0}</span>
+                        </button>
+                      </div>
+
+                      {candid.caption && (
+                        <p className="text-[10px] text-[#2C261F]/75 italic leading-snug line-clamp-3 pl-1.5 border-l border-[#C5A059]/30">
+                          "{candid.caption}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </section>
   );

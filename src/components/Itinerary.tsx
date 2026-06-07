@@ -26,7 +26,7 @@ export default function Itinerary() {
       <div className="absolute right-[-20%] bottom-[-10%] w-96 h-96 rounded-full bg-[#FAF6EE]/50 blur-3xl pointer-events-none border border-[#F3EBDD]/30" />
       <div className="absolute left-[-20%] top-[-10%] w-96 h-96 rounded-full bg-[#EBF0EA]/50 blur-3xl pointer-events-none" />
 
-      <div className="max-w-2xl mx-auto text-center mb-12">
+      <div className="max-w-2xl mx-auto text-center mb-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}

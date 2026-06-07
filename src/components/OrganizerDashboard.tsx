@@ -58,18 +58,34 @@ export default function OrganizerDashboard({
     }
   }, [tick, isOpen]);
 
-  // Read candids
+  // Read candids with real-time storage event synchronization
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("wedding_guest_candids");
-      if (stored) {
-        setCandids(JSON.parse(stored));
-      } else {
+    const loadCandids = () => {
+      try {
+        const stored = localStorage.getItem("wedding_guest_candids");
+        if (stored) {
+          setCandids(JSON.parse(stored));
+        } else {
+          setCandids([]);
+        }
+      } catch (e) {
         setCandids([]);
       }
-    } catch (e) {
-      setCandids([]);
-    }
+    };
+
+    loadCandids();
+
+    const handleStorageChange = () => {
+      loadCandids();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    const timer = setInterval(handleStorageChange, 3000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(timer);
+    };
   }, [tick, isOpen]);
 
   // Toggle visible moderation
