@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@200;300;400;500;600&family=Pinyon+Script&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif-luxury: "Cormorant Garamond", Georgia, serif;
+  --font-signature: "Pinyon Script", cursive;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Custom brand colors for Cream, Ivory, Champagne and Gold theme */
+  --color-luxury-cream: #FCFAF6;
+  --color-luxury-ivory: #FAF6EE;
+  --color-luxury-champagne: #F3EBDD;
+  --color-luxury-gold-soft: #E5C384;
+  --color-luxury-gold: #C5A059;
+  --color-luxury-gold-dark: #AF853E;
+  --color-luxury-charcoal: #2C261F;
+  --color-luxury-sage: #5F6F5E;
+  --color-luxury-sage-light: #EBF0EA;
+}
+
+@layer utilities {
+  /* Elegant cursive calligraphy flair */
+  .font-script {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 2.75rem; /* Pinyon Script needs to be larger than standard serif for legible elegant sweeping */
+    line-height: 1.1;
+    font-weight: 400;
+  }
+
+  /* Elegant foil gold text */
+  .text-gold-leaf {
+    background: linear-gradient(135deg, #B89643 0%, #E2CA7F 50%, #B89643 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Foil gold background border */
+  .bg-gold-leaf {
+    background: linear-gradient(135deg, #C5A059 0%, #F5E5C0 50%, #B8860B 100%);
+  }
+
+  /* Custom elegant scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FAF6EE;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C5A059;
+    border-radius: 3px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #FAF6EE;
+  color: #2C261F;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Simulated mobile frame smooth scrolling */
+#invite-scroller-frame {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+/* Subtle motion blur load-ins */
+@keyframes softBlurIn {
+  0% {
+    filter: blur(8px);
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-soft-blur {
+  animation: softBlurIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Luxury card luxury shining effect */
+@keyframes goldShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.gold-shimmer-bg {
+  background: linear-gradient(90deg, #C5A059 0%, #FAF6EE 35%, #FAF6EE 65%, #C5A059 100%);
+  background-size: 200% 100%;
+  animation: goldShimmer 12s infinite linear;
+}
