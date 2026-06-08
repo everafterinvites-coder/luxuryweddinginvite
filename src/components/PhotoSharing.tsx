@@ -36,34 +36,37 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch guest captures from localStorage on load
-  useEffect(() => {
-    const loadCandids = () => {
+  // Fetch guest captures from API / localStorage on load
+  const loadCandids = async () => {
+    try {
+      const res = await fetch("/api/candids");
+      if (res.ok) {
+        const data = await res.json();
+        setCandids(data);
+        localStorage.setItem("wedding_guest_candids", JSON.stringify(data));
+      } else {
+        throw new Error("API failed");
+      }
+    } catch (e) {
+      // Fallback to localStorage
       try {
         const stored = localStorage.getItem("wedding_guest_candids");
         if (stored) {
           setCandids(JSON.parse(stored));
-        } else {
-          // Start empty for genuine user-generated memories
-          localStorage.setItem("wedding_guest_candids", JSON.stringify([]));
-          setCandids([]);
         }
-      } catch (e) {
-        console.error(e);
-      }
-    };
+      } catch (err) {}
+    }
+  };
 
+  useEffect(() => {
     loadCandids();
 
     const handleStorageChange = () => {
-      try {
-        const stored = localStorage.getItem("wedding_guest_candids");
-        if (stored) setCandids(JSON.parse(stored));
-      } catch (err) {}
+      loadCandids();
     };
 
     window.addEventListener("storage", handleStorageChange);
-    const timer = setInterval(handleStorageChange, 3000);
+    const timer = setInterval(loadCandids, 4000);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -114,11 +117,34 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
   };
 
   // Upload actions setting to live stream feed
-  const handleCandidUpload = () => {
+  const handleCandidUpload = async () => {
     if (!selectedFile) return;
     setIsUploading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/candids", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: guestName.trim() || "Lovely Guest",
+          caption: captionText.trim() || undefined,
+          imgData: selectedFile,
+        }),
+      });
+
+      if (res.ok) {
+        const newCandid = await res.json();
+        setCandids((prev) => [newCandid, ...prev]);
+        try {
+          const stored = localStorage.getItem("wedding_guest_candids");
+          const currentList = stored ? JSON.parse(stored) : [];
+          localStorage.setItem("wedding_guest_candids", JSON.stringify([newCandid, ...currentList]));
+        } catch (e) {}
+      } else {
+        throw new Error("Upload API failed");
+      }
+    } catch (err) {
+      // Offline fallback
       const newCandid: GuestCandid = {
         id: `candid_${Date.now()}`,
         sender: guestName.trim() || "Lovely Guest",
@@ -141,34 +167,43 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
       } catch (err) {
         alert("The shared album is full! Please manage and delete older images via the Organizer Dashboard.");
       }
+    }
 
-      setSelectedFile(null);
-      setGuestName("");
-      setCaptionText("");
-      setIsUploading(false);
-      setShowConfirmation(true);
-      setTimeout(() => setShowConfirmation(false), 5000);
-    }, 900);
+    setSelectedFile(null);
+    setGuestName("");
+    setCaptionText("");
+    setIsUploading(false);
+    setShowConfirmation(true);
+    setTimeout(() => setShowConfirmation(false), 5000);
   };
 
   // Handle heart like action on pictures
-  const handleLikePhoto = (id: string) => {
+  const handleLikePhoto = async (id: string) => {
     if (likedIds.includes(id)) return; // Only allow one like per session
+    setLikedIds(prev => [...prev, id]);
     
     try {
-      const stored = localStorage.getItem("wedding_guest_candids");
-      const currentList: GuestCandid[] = stored ? JSON.parse(stored) : [];
-      const updated = currentList.map(c => {
-        if (c.id === id) {
-          return { ...c, likes: (c.likes || 0) + 1 };
-        }
-        return c;
-      });
-      localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
-      setCandids(updated);
-      setLikedIds(prev => [...prev, id]);
-      window.dispatchEvent(new Event("storage"));
-    } catch (err) {}
+      const res = await fetch(`/api/candids/${id}/like`, { method: "POST" });
+      if (res.ok) {
+        loadCandids();
+      } else {
+        throw new Error("Like API failed");
+      }
+    } catch (err) {
+      try {
+        const stored = localStorage.getItem("wedding_guest_candids");
+        const currentList: GuestCandid[] = stored ? JSON.parse(stored) : [];
+        const updated = currentList.map(c => {
+          if (c.id === id) {
+            return { ...c, likes: (c.likes || 0) + 1 };
+          }
+          return c;
+        });
+        localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
+        setCandids(updated);
+        window.dispatchEvent(new Event("storage"));
+      } catch (e) {}
+    }
   };
 
   // Launch camera

@@ -19,7 +19,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [submittedName, setSubmittedName] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) {
       setErrorMsg("Please enter your full name.");
@@ -33,24 +33,49 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
     }
 
     try {
-      // Fetch existing RSVPs from localStorage
-      const stored = localStorage.getItem("wedding_rsvps");
-      const rsvps: RSVPResponse[] = stored ? JSON.parse(stored) : [];
-
-      const newRSVP: RSVPResponse = {
-        id: "rsvp-" + Date.now(),
-        fullName: fullName.trim(),
-        email: email.trim(),
-        attending,
-        guestsCount: attending === "yes" ? guestsCount : 0,
-        dietaryNotes: dietaryNotes.trim() || undefined,
-        wellWishes: wellWishes.trim() || undefined,
-        submittedAt: new Date().toISOString()
-      };
-
-      // Append and save
-      rsvps.push(newRSVP);
-      localStorage.setItem("wedding_rsvps", JSON.stringify(rsvps));
+      let rsvpData: RSVPResponse;
+      
+      try {
+        const res = await fetch("/api/rsvps", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            email: email.trim(),
+            attending,
+            guestsCount: attending === "yes" ? guestsCount : 0,
+            dietaryNotes: dietaryNotes.trim() || undefined,
+            wellWishes: wellWishes.trim() || undefined
+          })
+        });
+        
+        if (res.ok) {
+          rsvpData = await res.json();
+          // Also sync to local storage
+          const stored = localStorage.getItem("wedding_rsvps");
+          const rsvps: RSVPResponse[] = stored ? JSON.parse(stored) : [];
+          rsvps.push(rsvpData);
+          localStorage.setItem("wedding_rsvps", JSON.stringify(rsvps));
+        } else {
+          throw new Error("API post failed");
+        }
+      } catch (e) {
+        // Fallback to offline localstorage persistence
+        rsvpData = {
+          id: "rsvp-" + Date.now(),
+          fullName: fullName.trim(),
+          email: email.trim(),
+          attending,
+          guestsCount: attending === "yes" ? guestsCount : 0,
+          dietaryNotes: dietaryNotes.trim() || undefined,
+          wellWishes: wellWishes.trim() || undefined,
+          submittedAt: new Date().toISOString()
+        };
+        const stored = localStorage.getItem("wedding_rsvps");
+        const rsvps: RSVPResponse[] = stored ? JSON.parse(stored) : [];
+        rsvps.push(rsvpData);
+        localStorage.setItem("wedding_rsvps", JSON.stringify(rsvps));
+      }
 
       // Trigger callback if defined
       if (onRSVPSubmitted) {

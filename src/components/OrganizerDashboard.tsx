@@ -45,22 +45,45 @@ export default function OrganizerDashboard({
 
   const [candids, setCandids] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadSubmissions = async () => {
     try {
-      const stored = localStorage.getItem("wedding_rsvps");
-      if (stored) {
-        setSubmss(JSON.parse(stored));
+      const res = await fetch("/api/rsvps");
+      if (res.ok) {
+        const data = await res.json();
+        setSubmss(data);
+        localStorage.setItem("wedding_rsvps", JSON.stringify(data));
       } else {
-        setSubmss([]);
+        throw new Error();
       }
     } catch (e) {
-      setSubmss([]);
+      try {
+        const stored = localStorage.getItem("wedding_rsvps");
+        if (stored) {
+          setSubmss(JSON.parse(stored));
+        } else {
+          setSubmss([]);
+        }
+      } catch (err) {
+        setSubmss([]);
+      }
     }
+  };
+
+  useEffect(() => {
+    loadSubmissions();
   }, [tick, isOpen]);
 
-  // Read candids with real-time storage event synchronization
-  useEffect(() => {
-    const loadCandids = () => {
+  const loadCandids = async () => {
+    try {
+      const res = await fetch("/api/candids");
+      if (res.ok) {
+        const data = await res.json();
+        setCandids(data);
+        localStorage.setItem("wedding_guest_candids", JSON.stringify(data));
+      } else {
+        throw new Error();
+      }
+    } catch (e) {
       try {
         const stored = localStorage.getItem("wedding_guest_candids");
         if (stored) {
@@ -68,11 +91,14 @@ export default function OrganizerDashboard({
         } else {
           setCandids([]);
         }
-      } catch (e) {
+      } catch (err) {
         setCandids([]);
       }
-    };
+    }
+  };
 
+  // Read candids with real-time storage event synchronization
+  useEffect(() => {
     loadCandids();
 
     const handleStorageChange = () => {
@@ -80,7 +106,7 @@ export default function OrganizerDashboard({
     };
 
     window.addEventListener("storage", handleStorageChange);
-    const timer = setInterval(handleStorageChange, 3000);
+    const timer = setInterval(loadCandids, 4000);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -89,25 +115,43 @@ export default function OrganizerDashboard({
   }, [tick, isOpen]);
 
   // Toggle visible moderation
-  const handleToggleApprove = (id: string) => {
-    const updated = candids.map(c => {
-      if (c.id === id) {
-        return { ...c, approved: c.approved === false ? true : false };
+  const handleToggleApprove = async (id: string) => {
+    try {
+      const res = await fetch(`/api/candids/${id}/approve`, { method: "POST" });
+      if (res.ok) {
+        loadCandids();
+      } else {
+        throw new Error();
       }
-      return c;
-    });
-    localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
-    setCandids(updated);
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  // Delete unwanted pics
-  const handleDeleteCandid = (id: string) => {
-    if (confirm("Delete this guest photo permanently? This action cannot be undone.")) {
-      const updated = candids.filter(c => c.id !== id);
+    } catch (e) {
+      const updated = candids.map(c => {
+        if (c.id === id) {
+          return { ...c, approved: c.approved === false ? true : false };
+        }
+        return c;
+      });
       localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
       setCandids(updated);
       window.dispatchEvent(new Event("storage"));
+    }
+  };
+
+  // Delete unwanted pics
+  const handleDeleteCandid = async (id: string) => {
+    if (confirm("Delete this guest photo permanently? This action cannot be undone.")) {
+      try {
+        const res = await fetch(`/api/candids/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          loadCandids();
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        const updated = candids.filter(c => c.id !== id);
+        localStorage.setItem("wedding_guest_candids", JSON.stringify(updated));
+        setCandids(updated);
+        window.dispatchEvent(new Event("storage"));
+      }
     }
   };
 
@@ -126,7 +170,7 @@ export default function OrganizerDashboard({
   };
 
   // Seed with standard mock initial guests if empty, to look incredible out of the box!
-  const handleSeedMockReplies = () => {
+  const handleSeedMockReplies = async () => {
     const mockData: RSVPResponse[] = [
       {
         id: "mock-1",
@@ -159,16 +203,39 @@ export default function OrganizerDashboard({
       }
     ];
 
-    localStorage.setItem("wedding_rsvps", JSON.stringify(mockData));
-    setSubmss(mockData);
-    onReset();
+    try {
+      // Seed directly on server
+      for (const item of mockData) {
+        await fetch("/api/rsvps", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        });
+      }
+      loadSubmissions();
+      onReset();
+    } catch (e) {
+      localStorage.setItem("wedding_rsvps", JSON.stringify(mockData));
+      setSubmss(mockData);
+      onReset();
+    }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (confirm("Are you sure you want to clear all submitted RSVPs?")) {
-      localStorage.removeItem("wedding_rsvps");
-      setSubmss([]);
-      onReset();
+      try {
+        const res = await fetch("/api/rsvps/reset", { method: "POST" });
+        if (res.ok) {
+          loadSubmissions();
+          onReset();
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        localStorage.removeItem("wedding_rsvps");
+        setSubmss([]);
+        onReset();
+      }
     }
   };
 
