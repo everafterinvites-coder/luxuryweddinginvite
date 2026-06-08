@@ -1,6 +1,6 @@
 {
   "name": "Luxury Wedding Invitation & RSVP",
   "description": "An elegant, mobile-optimized digital wedding invitation with real-time countdown, RSVP form, gallery, and schedule timeline.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

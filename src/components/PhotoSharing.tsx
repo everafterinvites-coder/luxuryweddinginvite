@@ -372,6 +372,18 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
                     <ImageIcon className="w-4 h-4" />
                     <span>Choose From Library</span>
                   </button>
+
+                  {uploadUrl && (
+                    <a
+                      href={uploadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 px-4 rounded-xl bg-gray-50 border border-dashed border-[#C5A059]/40 hover:bg-[#FAF6EE] text-[#C5A059] text-xs font-semibold tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#C5A059]/80" />
+                      <span>Open Shared Album Link</span>
+                    </a>
+                  )}
                 </div>
 
                 <AnimatePresence>
