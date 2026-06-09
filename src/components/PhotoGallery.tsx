@@ -2,6 +2,7 @@ import { useState, MouseEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { GALLERY_PHOTOS } from "../data/weddingData";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { FloralFlourish, FloralCorner } from "./FloralDecor";
 
 interface PhotoGalleryProps {
   weddingHero: string;
@@ -26,58 +27,72 @@ export default function PhotoGallery({ weddingHero, weddingCouple, weddingDetail
   };
 
   return (
-    <section id="photo-gallery-section" className="bg-[#FAF6EE] py-16 px-6 sm:px-8 border-b border-[#F3EBDD]/70 overflow-hidden">
-      <div className="max-w-2xl mx-auto text-center mb-12">
+    <section id="photo-gallery-section" className="bg-stationery py-20 px-6 sm:px-8 border-b border-[#F3EBDD]/70 overflow-hidden relative">
+      <FloralCorner className="top-4 right-4" side="top-right" />
+      <FloralCorner className="bottom-4 left-4" side="bottom-left" />
+
+      <div className="max-w-2xl mx-auto text-center mb-16 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
+          className="space-y-2"
         >
           <span className="font-script text-4xl sm:text-5xl text-[#C5A059] block mb-1">Our Moments</span>
-          <h2 className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide mb-3">Our Photo Gallery</h2>
-          <div className="w-12 h-[1px] bg-[#C5A059] mx-auto mb-4" />
-          <p className="text-xs text-[#2C261F]/60 max-w-sm mx-auto font-light leading-relaxed">
+          <h2 className="font-serif-luxury text-3xl sm:text-5xl text-letterpress font-medium tracking-wide mb-3">Our Photo Gallery</h2>
+          <FloralFlourish className="my-5" />
+          <p className="text-sm text-[#2C261F]/80 max-w-sm mx-auto font-light leading-relaxed">
             A small glimpse into our quietest smiles, adventures, and the golden trail that brought us to this dream wedding.
           </p>
         </motion.div>
       </div>
 
-      {/* Styled Grid */}
-      <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {/* Styled Grid: Matted Polaroid-style Layout with custom physical details */}
+      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-6 relative z-10">
         {photos.map((photo, index) => {
           // Adjust specific heights to make it look randomized and beautiful
           const isWide = photo.aspectRatio === "16:9";
-          const hClass = isWide ? "col-span-2 h-44" : "h-52";
+          const hClass = isWide ? "col-span-2 h-56 sm:h-64" : "h-64 sm:h-72";
+
+          // Organic subtle rotations on alternate cards for a real handcrafted photo-album feel
+          const rotationClass = 
+            index % 3 === 0 ? "rotate-[-1.5deg]" :
+            index % 3 === 1 ? "rotate-[1deg]" :
+            "rotate-[-0.5deg]";
 
           return (
             <motion.div
               key={photo.id}
               id={`gallery-photo-card-${index}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: index * 0.08 }}
+              transition={{ duration: 0.7, delay: index * 0.08 }}
               onClick={() => setActiveIdx(index)}
-              className={`group relative overflow-hidden rounded-xl border border-[#F3EBDD]/80 bg-white cursor-pointer shadow-3xs ${hClass}`}
+              className={`group relative ${rotationClass} hover:rotate-0 hover:scale-[1.02] p-3 sm:p-4 bg-white border border-[#F2EDE2] rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all duration-500 flex flex-col justify-between ${hClass}`}
             >
-              <img
-                src={photo.src}
-                alt={photo.alt}
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              
-              {/* Blur Hover Vignette screen */}
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <div className="p-2 rounded-full bg-white/20 backdrop-blur-xs text-white">
-                  <ZoomIn className="w-4 h-4" />
+              {/* Image Frame with a beautiful fine gold inset line */}
+              <div className="relative w-full h-full overflow-hidden rounded-md bg-[#FAF6EE] flex-1">
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                
+                {/* Blur Hover Vignette screen */}
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-400 flex items-center justify-center">
+                  <div className="p-2.5 rounded-full bg-white/20 backdrop-blur-xs text-white">
+                    <ZoomIn className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
 
-              {/* Minimal caption label */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <p className="text-[10px] text-white/90 font-light truncate">{photo.caption}</p>
+              {/* Handcrafted print caption at the bottom gutter */}
+              <div className="pt-3 text-center">
+                <p className="font-serif-luxury text-xs text-[#2C261F]/90 font-medium truncate uppercase tracking-wider">{photo.alt}</p>
+                <p className="text-[10px] text-[#C5A059] italic mt-0.5 truncate">{photo.caption}</p>
               </div>
             </motion.div>
           );
@@ -92,7 +107,7 @@ export default function PhotoGallery({ weddingHero, weddingCouple, weddingDetail
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActiveIdx(null)}
-            className="fixed inset-0 bg-black/95 flex flex-col justify-between p-4 z-50 select-none"
+            className="fixed inset-0 bg-black/95 flex flex-col justify-between p-4 z-50 select-none backdrop-blur-sm"
           >
             {/* Top Bar inside Lightbox */}
             <div className="flex justify-between items-center w-full max-w-lg mx-auto py-2">
@@ -126,7 +141,7 @@ export default function PhotoGallery({ weddingHero, weddingCouple, weddingDetail
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.97 }}
                     transition={{ duration: 0.3 }}
-                    className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+                    className="max-h-full max-w-full rounded-lg object-contain shadow-2xl border-4 border-white"
                     referrerPolicy="no-referrer"
                   />
                 </AnimatePresence>
@@ -142,7 +157,7 @@ export default function PhotoGallery({ weddingHero, weddingCouple, weddingDetail
 
             {/* Bottom Caption Overlay */}
             <div className="text-center w-full max-w-md mx-auto py-4">
-              <p className="font-serif-luxury text-[#FAF6EE] text-base tracking-wide">
+              <p className="font-serif-luxury text-[#FAF6EE] text-lg tracking-wide">
                 {photos[activeIdx].alt}
               </p>
               <p className="text-xs text-[#FAF6EE]/60 italic font-light mt-1.5">

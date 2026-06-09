@@ -10,6 +10,7 @@ import {
   MessageSquareHeart,
   CalendarCheck
 } from "lucide-react";
+import { FloralFlourish, FloralCorner, StationeryFrame } from "./FloralDecor";
 
 interface GuestCandid {
   id: string;
@@ -242,8 +243,12 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
   return (
     <section 
       id="photo-sharing-section" 
-      className="bg-[#FAF6EE] py-16 px-6 border-b border-[#F3EBDD]/70 space-y-12 relative overflow-hidden"
+      className="bg-stationery py-20 px-6 sm:px-8 border-b border-[#F3EBDD]/70 space-y-12 relative overflow-hidden"
     >
+      {/* Delicate botanical corners */}
+      <FloralCorner className="top-4 left-4" side="top-left" />
+      <FloralCorner className="bottom-4 right-4" side="bottom-right" />
+
       <input 
         type="file" 
         ref={fileInputRef}
@@ -263,10 +268,10 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-[#C5A059]/25 text-[#C5A059] text-[10px] font-bold tracking-widest uppercase mb-1"
+          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white border border-[#C5A059]/25 text-[#C5A059] text-[10px] font-bold tracking-widest uppercase mb-1 shadow-xs"
         >
           <Camera className="w-3.5 h-3.5" />
-          <span>Upload Your Photos</span>
+          <span>Candids & captures</span>
         </motion.div>
 
         <motion.h2
@@ -274,17 +279,19 @@ export default function PhotoSharing({ uploadUrl }: PhotoSharingProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide"
+          className="font-serif-luxury text-3xl sm:text-5xl text-letterpress font-medium tracking-wide"
         >
           Shared Wedding Album
         </motion.h2>
+
+        <FloralFlourish className="my-5" />
 
         <motion.p
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-xs sm:text-sm text-[#2C261F]/70 font-light max-w-lg mx-auto leading-relaxed"
+          className="text-xs sm:text-sm text-[#2C261F]/80 font-light max-w-lg mx-auto leading-relaxed"
         >
           Help us document our special day! Capture your favorite moments, laughs, and angles using your phone's camera, or upload existing pictures to our live digital album.
         </motion.p>

@@ -2,6 +2,7 @@ import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { RSVPResponse } from "../types";
 import { Heart, Sparkles, Check, CheckCircle2, AlertCircle } from "lucide-react";
+import { FloralFlourish, FloralCorner, StationeryFrame } from "./FloralDecor";
 
 interface RSVPFormProps {
   onRSVPSubmitted?: () => void;
@@ -98,21 +99,25 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
   };
 
   return (
-    <section id="rsvp-section" className="bg-[#FAF6EE] py-16 px-6 sm:px-8 border-b border-[#F3EBDD]/70 relative overflow-hidden">
-      {/* Decorative backdrop flowers (switched to low impact, safe golden & sage glow) */}
+    <section id="rsvp-section" className="bg-stationery py-20 px-6 sm:px-8 border-b border-[#F3EBDD]/70 relative overflow-hidden">
+      {/* Decorative backdrop flowers */}
       <div className="absolute right-[-15%] top-[-10%] w-96 h-96 rounded-full bg-[#C5A059]/5 blur-3xl pointer-events-none" />
       <div className="absolute left-[-15%] bottom-[-10%] w-96 h-96 rounded-full bg-[#5F6F5E]/5 blur-3xl pointer-events-none" />
 
-      <div className="max-w-2xl mx-auto text-center mb-10 relative z-10">
+      {/* Handcrafted floral corner engravings */}
+      <FloralCorner className="top-4 left-4" side="top-left" />
+      <FloralCorner className="bottom-4 right-4" side="bottom-right" />
+
+      <div className="max-w-2xl mx-auto text-center mb-14 relative z-10">
         <span className="font-script text-4xl sm:text-5xl text-[#AF853E] block mb-1">Be Our Guest</span>
-        <h2 className="font-serif-luxury text-3xl sm:text-4xl text-[#2C261F] tracking-wide mb-3">Kindly Reply</h2>
-        <div className="w-12 h-[1px] bg-[#C5A059] mx-auto mb-4" />
-        <p className="text-xs text-[#2C261F] max-w-xs mx-auto font-medium leading-relaxed">
+        <h2 className="font-serif-luxury text-3xl sm:text-5xl text-letterpress font-medium tracking-wide mb-3">Kindly Reply</h2>
+        <FloralFlourish className="my-5" />
+        <p className="text-sm text-[#2C261F]/80 max-w-sm mx-auto font-light leading-relaxed bg-[#FCFAF6]/40 p-3 rounded-lg border border-[#F3EBDD]/20 backdrop-blur-xs">
           Please respond by September 15, 2026. We are excited to raise a champagne toast with you!
         </p>
       </div>
 
-      <div className="max-w-2xl mx-auto relative z-10">
+      <div className="max-w-xl mx-auto relative z-10">
         <AnimatePresence mode="wait">
           {status === "success" ? (
             <motion.div
@@ -120,7 +125,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl p-8 border border-[#C5A059] shadow-md text-center space-y-6 relative overflow-hidden"
+              className="bg-[#FCFAF6] rounded-2xl p-8 sm:p-10 border border-[#C5A059] border-double-inset shadow-md text-center space-y-6 relative overflow-hidden"
             >
               {/* Gold light burst animation behind wax seal */}
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#C5A059] via-[#FAF6EE] to-[#AF853E]" />
@@ -134,7 +139,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
                   Thank You, {submittedName}!
                 </h3>
                 <p className="text-xs text-[#5F6F5E] bg-[#EBF0EA] py-1.5 px-3 rounded-full inline-block font-medium">
-                  {attending === "yes" ? "ACCEPTED WITH JOY" : "REDECLINED WITH REGRET"}
+                  {attending === "yes" ? "ACCEPTED WITH JOY" : "DECLINED WITH REGRET"}
                 </p>
                 <p className="text-xs text-[#2C261F]/70 font-light leading-relaxed pt-2">
                   {attending === "yes" 
@@ -155,7 +160,7 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
             <motion.form
               layout
               onSubmit={handleSubmit}
-              className="bg-white rounded-2xl p-6 sm:p-8 border border-[#F3EBDD] shadow-xs space-y-5"
+              className="bg-[#FCFAF6] rounded-2xl p-8 sm:p-10 border border-[#F3EBDD] border-double-inset shadow-md space-y-6"
             >
               {status === "error" && (
                 <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-red-700">
@@ -166,18 +171,18 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
 
               {/* Attendance Selection */}
               <div className="space-y-2">
-                <label className="text-[10px] tracking-widest text-[#2C261F]/50 block font-semibold uppercase">
+                <label className="text-[10px] tracking-[0.15em] text-[#C5A059] block font-bold uppercase text-center mb-3">
                   ATTENDANCE STATUS
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
                     onClick={() => setAttending("yes")}
-                    className={`py-3 px-4 rounded-xl border text-xs font-medium cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
+                    className={`py-3.5 px-4 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                       attending === "yes"
-                        ? "border-[#C5A059] bg-[#FDFBF7] text-[#C5A059] shadow-2xs"
-                        : "border-[#F3EBDD] bg-white hover:bg-gray-50 text-[#2C261F]/60"
-                    }`}
+                        ? "border-[#C5A059] bg-[#FAF6EE] text-[#AF853E] shadow-3xs"
+                        : "border-[#F3EBDD] bg-white hover:bg-[#FCFAF6] text-[#2C261F]/60"
+                     }`}
                   >
                     <Heart className={`w-4 h-4 ${attending === "yes" ? "fill-[#C5A059]" : ""}`} />
                     <span>Joyfully Accept</span>
@@ -186,10 +191,10 @@ export default function RSVPForm({ onRSVPSubmitted }: RSVPFormProps) {
                   <button
                     type="button"
                     onClick={() => setAttending("no")}
-                    className={`py-3 px-4 rounded-xl border text-xs font-medium cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
+                    className={`py-3.5 px-4 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                       attending === "no"
-                        ? "border-[#C5A059] bg-[#FDFBF7] text-[#C5A059] shadow-2xs"
-                        : "border-[#F3EBDD] bg-white hover:bg-gray-50 text-[#2C261F]/60"
+                        ? "border-[#C5A059] bg-[#FAF6EE] text-[#AF853E] shadow-3xs"
+                        : "border-[#F3EBDD] bg-white hover:bg-[#FCFAF6] text-[#2C261F]/60"
                     }`}
                   >
                     <Sparkles className="w-3.5 h-3.5 text-current" />

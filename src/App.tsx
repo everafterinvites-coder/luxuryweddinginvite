@@ -31,6 +31,7 @@ import PhotoGallery from "./components/PhotoGallery";
 import PhotoSharing from "./components/PhotoSharing";
 import RSVPForm from "./components/RSVPForm";
 import OrganizerDashboard from "./components/OrganizerDashboard";
+import { OrnamentalDivider, FloralCorner, FloralFlourish } from "./components/FloralDecor";
 // Beautiful imagery and cinematic backdrop for the invitation
 const weddingVideo = new URL("./assets/images/beach video.mp4", import.meta.url).href;
 const weddingHeroImg = new URL("./assets/images/couplehands.jfif", import.meta.url).href;
@@ -44,7 +45,12 @@ export default function App() {
   
   // Custom Photo sharing target link live synchronizer
   const [photoUploadUrl, setPhotoUploadUrl] = useState(() => {
-    return localStorage.getItem("wedding_photo_upload_url") || COUPLE_INFO.photoUploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027";
+    const defaultUrl = COUPLE_INFO.photoUploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027";
+    const stored = localStorage.getItem("wedding_photo_upload_url");
+    if (defaultUrl !== "https://photos.app.goo.gl/AlexandraAndDylan2027") {
+      return defaultUrl;
+    }
+    return stored || defaultUrl;
   });
 
   // Fetch real-time settings (including the photo upload URL) on load
@@ -144,7 +150,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF6EE] text-[#2C261F] relative select-none">
+    <div className="min-h-screen w-full bg-stationery text-[#2C261F] relative select-none">
       
       {/* EXQUISITE BLURRED DECORATIVE DESKTOP CANVAS BACKGROUND */}
       <div 
@@ -232,19 +238,28 @@ export default function App() {
           <motion.div 
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.6 } }}
-            className="fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center p-6 z-50 overflow-hidden"
+            className="fixed inset-0 bg-stationery flex flex-col items-center justify-center p-6 z-50 overflow-hidden"
           >
+            {/* Handcrafted floral corner decorations */}
+            <FloralCorner className="top-4 left-4" side="top-left" />
+            <FloralCorner className="top-4 right-4" side="top-right" />
+            <FloralCorner className="bottom-4 left-4" side="bottom-left" />
+            <FloralCorner className="bottom-4 right-4" side="bottom-right" />
+
             {/* Elegant invitation cover background card */}
-            <div className="max-w-xs w-full bg-white border border-[#F3EBDD] rounded-2xl p-8 shadow-xl text-center flex flex-col items-center justify-center space-y-8 relative">
-              <div className="absolute inset-2 border border-[#C5A059]/20 rounded-xl" />
+            <div className="max-w-xs w-full bg-[#FCFAF6] border border-[#F3EBDD] rounded-2xl p-8 shadow-xl text-center flex flex-col items-center justify-center space-y-8 relative">
+              {/* Outer gold border */}
+              <div className="absolute inset-2 border border-[#C5A059]/15 rounded-xl pointer-events-none" />
+              {/* Inner dashed line */}
+              <div className="absolute inset-3.5 border border-[#C5A059]/30 border-dashed rounded-lg pointer-events-none" />
               
               <div className="space-y-3 relative z-10 pt-4">
                 <span className="font-script text-[#C5A059] text-2xl">The Wedding of</span>
-                <h1 className="font-serif-luxury text-3xl text-[#2C261F] tracking-wide leading-tight">
+                <h1 className="font-serif-luxury text-3xl text-letterpress font-medium tracking-wide leading-tight">
                   Alexandra <br />& Dylan
                 </h1>
-                <div className="w-8 h-[1px] bg-[#C5A059] mx-auto my-3" />
-                <p className="text-[10px] tracking-widest text-[#2C261F]/55 uppercase">
+                <FloralFlourish className="my-2" />
+                <p className="text-[10px] tracking-widest text-[#2C261F]/70 font-bold uppercase">
                   LAKE COMO, ITALY
                 </p>
               </div>
@@ -287,7 +302,7 @@ export default function App() {
       {/* CORE PORTAL SCROLLER CANVAS (Optimized as premium responsive layout native to desktop and mobile) */}
       <main 
         id="invite-scroller-frame"
-        className={`w-full min-h-screen bg-[#FAF6EE] transition-all duration-500 relative outline-none flex flex-col ${
+        className={`w-full min-h-screen bg-stationery transition-all duration-500 relative outline-none flex flex-col ${
           hasEntered ? "animate-soft-blur" : ""
         }`}
       >
@@ -392,11 +407,17 @@ export default function App() {
           {/* SECTION 2: OUR STORY STORY TIME LINE */}
           <OurStory />
 
+          <OrnamentalDivider />
+
           {/* SECTION 3: VENUE EVENT DETAILS (With Interactive palette map links) */}
           <EventDetails detailPhotoUrl={weddingDetailImg} />
 
+          <OrnamentalDivider />
+
           {/* SECTION 4: DAY PROGRAM ITINERARY */}
           <Itinerary />
+
+          <OrnamentalDivider />
 
           {/* SECTION 5: PHOTO GALLERY OF MEMORIES */}
           <PhotoGallery 
@@ -405,22 +426,30 @@ export default function App() {
             weddingDetail={weddingDetailImg} 
           />
 
+          <OrnamentalDivider />
+
           {/* SECTION 5.5: PHOTO SHARING GUEST QR CODE */}
           <PhotoSharing uploadUrl={photoUploadUrl} />
 
+          <OrnamentalDivider />
+
           {/* SECTION 6: THE GIFT REGISTRY PREVIEW & FAQS */}
-          <section id="registry-section" className="bg-[#FAF6EE] py-14 px-6 border-b border-[#F3EBDD]/70 space-y-10 text-center">
-            
-            {/* Gift Registry Card block */}
-            <div className="max-w-md mx-auto bg-white border border-[#F3EBDD] rounded-2xl p-6 shadow-3xs space-y-4">
-              <div className="w-10 h-10 rounded-full bg-[#FAF6EE] flex items-center justify-center mx-auto text-[#C5A059]">
+          <section id="registry-section" className="bg-stationery py-20 px-6 border-b border-[#F3EBDD]/70 space-y-10 text-center relative overflow-hidden">
+            {/* Elegant botanical corners for the registry section */}
+            <FloralCorner className="top-4 left-4" side="top-left" />
+            <FloralCorner className="bottom-4 right-4" side="bottom-right" />
+
+            {/* Gift Registry Card block with a gorgeous inset stationery card border */}
+            <div className="max-w-md mx-auto bg-[#FCFAF6] border border-[#F3EBDD] border-double-inset rounded-2xl p-8 shadow-3xs space-y-5 relative z-10">
+              <div className="w-11 h-11 rounded-full bg-[#FAF6EE] border border-[#C5A059]/20 flex items-center justify-center mx-auto text-[#C5A059]">
                 <Gift className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="font-serif-luxury text-xl text-[#2C261F] tracking-wide mb-1.5">
+              <div className="space-y-2">
+                <span className="font-script text-3xl text-[#C5A059] block mb-1">Blessings</span>
+                <h3 className="font-serif-luxury text-xl text-letterpress font-bold tracking-wide mb-1.5">
                   The Honeymoon Wish
                 </h3>
-                <p className="text-xs text-[#2C261F]/70 font-light leading-relaxed max-w-sm mx-auto">
+                <p className="text-xs text-[#2C261F]/80 font-light leading-relaxed max-w-sm mx-auto">
                   Your laughter, joy, and shared memories are the only gifts we search for. However, should you wish to bless our future house or honeymoon trip, contributions can be made here.
                 </p>
               </div>
@@ -428,24 +457,24 @@ export default function App() {
               <button
                 onClick={() => setShowGiftModal(true)}
                 id="btn-show-wish"
-                className="w-full py-2.5 rounded-lg bg-[#5F6F5E] hover:bg-[#4E5C4D] text-white text-xs tracking-wider transition-colors cursor-pointer font-medium"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#5F6F5E] to-[#4E5C4D] hover:from-[#4E5C4D] hover:to-[#5F6F5E] text-white text-xs tracking-wider uppercase font-semibold transition-all shadow-3xs cursor-pointer active:scale-95"
               >
                 View Registry details
               </button>
             </div>
 
             {/* Quick Accordion for FAQs */}
-            <div className="max-w-md mx-auto pt-4 text-left">
+            <div className="max-w-md mx-auto pt-4 text-left relative z-10">
               <button
                 onClick={() => setShowFaq(!showFaq)}
                 id="btn-toggle-faq"
-                className="w-full flex justify-between items-center py-2.5 border-b border-[#F3EBDD]/80 text-[#2C261F]/80 font-sans hover:text-[#2C261F] transition-colors cursor-pointer"
+                className="w-full flex justify-between items-center py-3 border-b border-[#F3EBDD] text-[#2C261F]/80 font-serif-luxury font-bold tracking-wide hover:text-[#2C261F] transition-colors cursor-pointer text-sm"
               >
                 <div className="flex items-center gap-2">
                   <Info className="w-4 h-4 text-[#C5A059]" />
-                  <span className="text-xs font-semibold uppercase tracking-wider">Helpful FAQs & Lodging Info</span>
+                  <span className="uppercase tracking-widest text-xs">Helpful FAQs & Lodging Info</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showFaq ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-[#C5A059] transition-transform duration-300 ${showFaq ? "rotate-180" : ""}`} />
               </button>
 
               <AnimatePresence>
@@ -455,7 +484,7 @@ export default function App() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="overflow-hidden bg-white/40 rounded-xl px-1.5 mt-2 divide-y divide-[#F3EBDD]/40"
+                    className="overflow-hidden bg-[#FCFAF6] border border-[#F3EBDD]/60 rounded-xl px-4 py-2 mt-3 divide-y divide-[#F3EBDD]/40 shadow-3xs"
                   >
                     {FAQ_ITEMS.map((faq, i) => (
                       <div key={i} className="py-3 text-left space-y-1">
@@ -472,6 +501,8 @@ export default function App() {
               </AnimatePresence>
             </div>
           </section>
+
+          <OrnamentalDivider />
 
           {/* SECTION 7: RSVP FORM ACTION CARD */}
           <div id="rsvp-section-form">

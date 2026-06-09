@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
+import { COUPLE_INFO } from "./src/data/weddingData";
 
 const app = express();
 const PORT = 3000;
@@ -16,17 +17,26 @@ const settingsPath = path.join(process.cwd(), "src", "data", "db_settings.json")
 
 // Helper to safely read settings
 function readSettingsFile(): any {
+  const defaultUrl = COUPLE_INFO?.photoUploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027";
   try {
     if (!fs.existsSync(settingsPath)) {
-      const defaultSettings = { photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027" };
+      const defaultSettings = { photoUploadUrl: defaultUrl };
       fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2), "utf-8");
       return defaultSettings;
     }
     const content = fs.readFileSync(settingsPath, "utf-8");
-    return JSON.parse(content || "{}");
+    const parsed = JSON.parse(content || "{}");
+    
+    // If the database has the placeholder but the code has a customized link, prioritize the code change
+    if ((!parsed.photoUploadUrl || parsed.photoUploadUrl === "https://photos.app.goo.gl/AlexandraAndDylan2027") && 
+        defaultUrl !== "https://photos.app.goo.gl/AlexandraAndDylan2027") {
+      parsed.photoUploadUrl = defaultUrl;
+      writeSettingsFile(parsed); // sync back
+    }
+    return parsed;
   } catch (err) {
     console.error(`Error reading settings:`, err);
-    return { photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027" };
+    return { photoUploadUrl: defaultUrl };
   }
 }
 
