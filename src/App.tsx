@@ -44,7 +44,7 @@ export default function App() {
   
   // Custom Photo sharing target link live synchronizer
   const [photoUploadUrl, setPhotoUploadUrl] = useState(() => {
-    return localStorage.getItem("wedding_photo_upload_url") || "https://photos.app.goo.gl/AlexandraAndDylan2027";
+    return localStorage.getItem("wedding_photo_upload_url") || COUPLE_INFO.photoUploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027";
   });
 
   const handleUpdateUploadUrl = (newUrl: string) => {

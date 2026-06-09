@@ -22,6 +22,9 @@ export const COUPLE_INFO = {
     { name: "Dusk Slate", class: "bg-[#2C261F] text-white" }
   ],
   quote: "Two lives, two hearts, joined in one love, beneath the eternal skies of Lago di Como.",
+  // --- CUSTOMIZABLE ALBUM URL (COMMITTED TO GITHUB) ---
+  // Replace this link with your own Google Photos, Joy, Wedbox, or shared digital album link!
+  photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027",
 };
 
 export const STORY_TIMELINE: TimelineEvent[] = [
