@@ -47,9 +47,37 @@ export default function App() {
     return localStorage.getItem("wedding_photo_upload_url") || COUPLE_INFO.photoUploadUrl || "https://photos.app.goo.gl/AlexandraAndDylan2027";
   });
 
-  const handleUpdateUploadUrl = (newUrl: string) => {
+  // Fetch real-time settings (including the photo upload URL) on load
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.photoUploadUrl) {
+            setPhotoUploadUrl(data.photoUploadUrl);
+            localStorage.setItem("wedding_photo_upload_url", data.photoUploadUrl);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load settings from server:", err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleUpdateUploadUrl = async (newUrl: string) => {
     localStorage.setItem("wedding_photo_upload_url", newUrl);
     setPhotoUploadUrl(newUrl);
+    try {
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoUploadUrl: newUrl })
+      });
+    } catch (err) {
+      console.error("Failed to persist settings on server:", err);
+    }
   };
   
   // Immersive layout config

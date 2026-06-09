@@ -24,7 +24,7 @@ export const COUPLE_INFO = {
   quote: "Two lives, two hearts, joined in one love, beneath the eternal skies of Lago di Como.",
   // --- CUSTOMIZABLE ALBUM URL (COMMITTED TO GITHUB) ---
   // Replace this link with your own Google Photos, Joy, Wedbox, or shared digital album link!
-  photoUploadUrl: "https://photos.app.goo.gl/8e3Dev6sPi5qRLpw9",
+  photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027",
 };
 
 export const STORY_TIMELINE: TimelineEvent[] = [

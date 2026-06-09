@@ -12,6 +12,32 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const rsvpPath = path.join(process.cwd(), "src", "data", "db_rsvps.json");
 const candidPath = path.join(process.cwd(), "src", "data", "db_candids.json");
+const settingsPath = path.join(process.cwd(), "src", "data", "db_settings.json");
+
+// Helper to safely read settings
+function readSettingsFile(): any {
+  try {
+    if (!fs.existsSync(settingsPath)) {
+      const defaultSettings = { photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027" };
+      fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2), "utf-8");
+      return defaultSettings;
+    }
+    const content = fs.readFileSync(settingsPath, "utf-8");
+    return JSON.parse(content || "{}");
+  } catch (err) {
+    console.error(`Error reading settings:`, err);
+    return { photoUploadUrl: "https://photos.app.goo.gl/AlexandraAndDylan2027" };
+  }
+}
+
+// Helper to safely write settings
+function writeSettingsFile(data: any) {
+  try {
+    fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error(`Error writing settings:`, err);
+  }
+}
 
 // Helper to safely read files
 function readDataFile(filePath: string): any[] {
@@ -38,6 +64,22 @@ function writeDataFile(filePath: string, data: any[]) {
 }
 
 // --- API ENDPOINTS ---
+
+// 0. Get and Save global settings
+app.get("/api/settings", (req, res) => {
+  const settings = readSettingsFile();
+  res.json(settings);
+});
+
+app.post("/api/settings", (req, res) => {
+  const { photoUploadUrl } = req.body;
+  const settings = readSettingsFile();
+  if (photoUploadUrl !== undefined) {
+    settings.photoUploadUrl = photoUploadUrl.trim();
+  }
+  writeSettingsFile(settings);
+  res.json(settings);
+});
 
 // 1. Get all RSVPs
 app.get("/api/rsvps", (req, res) => {
