@@ -32,6 +32,7 @@ import PhotoSharing from "./components/PhotoSharing";
 import RSVPForm from "./components/RSVPForm";
 import OrganizerDashboard from "./components/OrganizerDashboard";
 import { OrnamentalDivider, FloralCorner, FloralFlourish } from "./components/FloralDecor";
+import EnvelopeSequence from "./components/EnvelopeSequence";
 // Beautiful imagery and cinematic backdrop for the invitation
 const weddingVideo = new URL("./assets/images/beach video.mp4", import.meta.url).href;
 const weddingHeroImg = new URL("./assets/images/couplehands.jfif", import.meta.url).href;
@@ -87,7 +88,7 @@ export default function App() {
   };
   
   // Immersive layout config
-  const [hasEntered, setHasEntered] = useState(true); // Default to true to remove the envelope/splash at the start
+  const [hasEntered, setHasEntered] = useState(false); // Default to false to enable the envelope opening sequence splash at the start
   const [isMuted, setIsMuted] = useState(true);
   const [rsvpTick, setRsvpTick] = useState(0); // Trigger reload of stats on dashboard
   
@@ -232,70 +233,13 @@ export default function App() {
         </motion.button>
       )}
 
-      {/* AUDIO PLAY WRAPPER CONTAINER */}
+      {/* AUDIO PLAY WRAPPER CONTAINER: Premium Interactive Invitation Opening Sequence */}
       <AnimatePresence>
         {!hasEntered && (
-          <motion.div 
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.6 } }}
-            className="fixed inset-0 bg-stationery flex flex-col items-center justify-center p-6 z-50 overflow-hidden"
-          >
-            {/* Handcrafted floral corner decorations */}
-            <FloralCorner className="top-4 left-4" side="top-left" />
-            <FloralCorner className="top-4 right-4" side="top-right" />
-            <FloralCorner className="bottom-4 left-4" side="bottom-left" />
-            <FloralCorner className="bottom-4 right-4" side="bottom-right" />
-
-            {/* Elegant invitation cover background card */}
-            <div className="max-w-xs w-full bg-[#FCFAF6] border border-[#F3EBDD] rounded-2xl p-8 shadow-xl text-center flex flex-col items-center justify-center space-y-8 relative">
-              {/* Outer gold border */}
-              <div className="absolute inset-2 border border-[#C5A059]/15 rounded-xl pointer-events-none" />
-              {/* Inner dashed line */}
-              <div className="absolute inset-3.5 border border-[#C5A059]/30 border-dashed rounded-lg pointer-events-none" />
-              
-              <div className="space-y-3 relative z-10 pt-4">
-                <span className="font-script text-[#C5A059] text-2xl">The Wedding of</span>
-                <h1 className="font-serif-luxury text-3xl text-letterpress font-medium tracking-wide leading-tight">
-                  Alexandra <br />& Dylan
-                </h1>
-                <FloralFlourish className="my-2" />
-                <p className="text-[10px] tracking-widest text-[#2C261F]/70 font-bold uppercase">
-                  LAKE COMO, ITALY
-                </p>
-              </div>
-
-              {/* Gold styled wax seal opening design */}
-              <motion.button
-                onClick={handleEnterInvitation}
-                id="btn-enter-invite"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#AF853E] to-[#E2CA7F] hover:from-[#C5A059] hover:to-[#FAF6EE] text-white flex flex-col items-center justify-center shadow-lg cursor-pointer border-4 border-white relative z-10"
-              >
-                <div className="flex flex-col items-center justify-center">
-                  <span className="font-serif-luxury text-lg font-bold tracking-widest text-[#FAF6EE] drop-shadow-xs">
-                    {COUPLE_INFO.initials}
-                  </span>
-                  <span className="text-[8px] tracking-widest text-[#FAF6EE]/80">OPEN</span>
-                </div>
-              </motion.button>
-
-              <div className="space-y-1 relative z-10">
-                <p className="text-[11px] text-[#2C261F]/60 font-light max-w-2xs">
-                  We invite you to share our joy under the warm Italian sun.
-                </p>
-                {customGuest && (
-                  <p className="text-xs text-[#5F6F5E] font-medium mt-4">
-                    Exclusively Prepared For: <br />
-                    <span className="font-sans font-semibold border-b border-[#EBF0EA] pb-0.5">{customGuest}</span>
-                  </p>
-                )}
-              </div>
-            </div>
-            <p className="text-[10px] text-gray-400 font-mono tracking-wider mt-6 select-none uppercase">
-              • Tap code: <code className="bg-white/40 p-1 rounded">VILLA2027</code> for organizer entry •
-            </p>
-          </motion.div>
+          <EnvelopeSequence 
+            onEnter={handleEnterInvitation} 
+            customGuest={customGuest || undefined} 
+          />
         )}
       </AnimatePresence>
 
